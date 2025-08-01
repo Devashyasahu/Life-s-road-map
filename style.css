@@ -1,0 +1,170 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'EB Garamond', serif;
+    color: #fff;
+    background: #51738d;
+    overflow-x: hidden;
+  }
+  
+  /* Mountain & Waterfall Scene */
+  .background-scene {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -2;
+    overflow: hidden;
+  }
+  .mountains {
+    width: 100vw;
+    height: 100vh;
+    display: block;
+  }
+  
+  /* Animate Waterfall (sparkle/light flow) */
+  .mountains rect[x="695"], .mountains rect[x="685"] {
+    animation: waterfall-flow 1.75s infinite alternate;
+  }
+  @keyframes waterfall-flow {
+    from { opacity: 0.62; }
+    to   { opacity: 0.96; }
+  }
+  
+  /* Bird Animation */
+  .bird {
+    position: absolute;
+    left: -80px;
+    top: 60px;
+    z-index: 3;
+    animation: fly-bird 16s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes fly-bird {
+    0% { left: -80px; top: 60px; }
+    10% { top: 40px; }
+    30% { top: 80px; }
+    50% { top: 60px; }
+    70% { top: 20px; }
+    90% { top: 70px; }
+    100% { left: 100vw; }
+  }
+  /* Flap the wing */
+  .bird #wing {
+    transform-origin: 30px 30px;
+    animation: flap 0.6s infinite cubic-bezier(.22,1.57,.78,.69);
+  }
+  @keyframes flap {
+    0%, 100% { transform: rotate(-8deg); }
+    50% { transform: rotate(24deg); }
+  }
+  
+  /* Overlay for readability */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(to bottom, rgba(14, 22, 38, 0.16) 30%, rgba(35, 40, 60, 0.54) 90%);
+    z-index: -1;
+    pointer-events: none;
+  }
+  
+  /* Other styles (header/navbar/cards) same as previous theme */
+  header {
+    text-align: center;
+    padding: 60px 20px 20px;
+    font-family: 'Imperial Script', cursive;
+    font-size: 3.5rem;
+    text-shadow: 0 0 20px #b6e7ff, 0 0 30px #324994;
+    animation: pulse 4s infinite;
+    position: relative;
+    z-index: 2;
+  }
+  @keyframes pulse {
+    0%, 100% { text-shadow: 0 0 20px #b6e7ff, 0 0 30px #324994; }
+    50% { text-shadow: 0 0 35px #e5f4ff, 0 0 60px #324994; }
+  }
+  nav {
+    position: sticky;
+    top: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(10px);
+    padding: 10px;
+    text-align: center;
+    z-index: 10;
+  }
+  nav a {
+    color: white;
+    text-decoration: none;
+    margin: 0 15px;
+    font-size: 1.1rem;
+    transition: color 0.3s;
+  }
+  nav a:hover { color: #88e2ff; }
+  
+  .parallax-layer {
+    position: relative;
+    padding: 120px 20px;
+    text-align: center;
+    z-index: 1;
+  }
+  .parallax-layer h2 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    text-shadow: 0 0 16px rgba(180,220,255,0.18);
+  }
+  .parallax-layer p {
+    font-size: 1.2rem;
+    color: #e0e7fb;
+  }
+  .cards-section {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .card {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 12px;
+    padding: 20px 30px;
+    min-width: 180px;
+    box-shadow: 0 0 10px rgba(110,155,205,0.06);
+    backdrop-filter: blur(6px);
+    transition: transform 0.4s, box-shadow 0.4s;
+    color: white;
+    text-decoration: none;
+  }
+  .card:hover {
+    transform: translateY(-12px) scale(1.03);
+    box-shadow: 0 0 25px #7cc9e388;
+  }
+  @media (max-width: 600px) {
+    header { font-size: 1.8rem; padding-top: 30px; }
+    .parallax-layer h2 { font-size: 1.3em; }
+    nav a { font-size: 1em; }
+  }
+  .mountain-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.2); /* Adjust darkness */
+    z-index: -1;
+  }
+    

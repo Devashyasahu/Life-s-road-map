@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Life's Road Map - Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      color: #333;
+      overflow-x: hidden;
+    }
+
+    /* Content Layer (no opacity for direct background view) */
+    .content-layer {
+      position: relative;
+      z-index: 1;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .content-layer * {
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3); /* Shadow for text readability */
+    }
+
+    /* Canvas for Mountain Background (fixed) */
+    #mountain-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      z-index: -1;
+    }
+
+    /* Left Navigation Bar */
+    #left-navbar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 220px;
+      height: 100vh;
+      background: linear-gradient(to bottom, rgba(50, 73, 148, 0.95), rgba(30, 53, 128, 0.95));
+      color: white;
+      padding: 25px;
+      z-index: 9;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+    #left-navbar ul {
+      list-style: none;
+    }
+    #left-navbar li {
+      margin: 20px 0;
+    }
+    #left-navbar a {
+      color: white;
+      text-decoration: none;
+      font-size: 1.1em;
+      transition: color 0.3s;
+    }
+    #left-navbar a:hover {
+      color: #a1c4fd;
+    }
+    #left-navbar .header-item {
+      font-size: 1.4em;
+      font-weight: bold;
+      margin-bottom: 25px;
+      border-bottom: 1px solid rgba(255,255,255,0.3);
+      padding-bottom: 10px;
+    }
+
+    /* Main Content */
+    #main-content {
+      margin-left: 240px;
+      padding: 30px;
+    }
+    #greeting {
+      text-align: center;
+      font-size: 2em;
+      margin-bottom: 40px;
+      color: #324994;
+      font-weight: bold;
+    }
+
+    /* Cards Section */
+    #cards {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 60px;
+      gap: 20px;
+    }
+    .card {
+      background: rgba(248, 249, 250, 0.9);
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      padding: 25px;
+      text-align: center;
+      width: 30%;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+    .card h3 {
+      margin-bottom: 15px;
+      font-size: 1.2em;
+    }
+    .card .count {
+      font-size: 2.5em;
+      color: #324994;
+    }
+
+    /* Quick Stats Section with Scale on Left */
+    #quick-stats {
+      background: rgba(248, 249, 250, 0.9);
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      padding: 25px;
+      display: flex;
+      align-items: flex-start;
+      gap: 5px; /* Decreased gap to 5px */
+    }
+    #quick-stats .scale-container {
+      width: 100px;
+      flex-shrink: 0;
+    }
+    #quick-stats .stats-content {
+      flex-grow: 1;
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    #quick-stats .stats-left {
+      width: 60%;
+    }
+    #quick-stats .stats-right {
+      width: 35%;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    #quick-stats .stats-right img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    #quick-stats h2 {
+      margin-bottom: 15px;
+      font-size: 1.5em;
+    }
+    #quick-stats .date-stats {
+      margin-bottom: 20px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 15px;
+    }
+    #quick-stats .date-line {
+      font-size: 1.3em;
+      font-weight: bold;
+      display: block;
+      margin-bottom: 10px;
+      color: #324994;
+    }
+    #quick-stats .stats-details {
+      list-style: none;
+      padding-left: 0;
+    }
+    #quick-stats .stats-details li {
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    /* Vertical Scale Styles */
+    .full-vertical-scale {
+      width: 100px;
+      min-height: 400px;
+      background: transparent;
+      border: 2px solid #bfa76f;
+      border-radius: 8px;
+      position: relative;
+      box-shadow: 0 2px 8px #0002;
+      overflow: visible;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      font-family: monospace;
+    }
+
+    .scale-tick {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      position: relative;
+    }
+
+    .scale-btn.year {
+      width: 70px;
+      height: 28px;
+      background: rgba(191, 167, 111, 0.15);
+      border: 1px solid #bfa76f;
+      border-radius: 6px;
+      color: #bfa76f;
+      font-size: 15px;
+      font-weight: bold;
+      margin: 0 0 0 0;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding-left: 8px;
+    }
+    .scale-btn.year.selected {
+      background: #bfa76f;
+      color: #222;
+      box-shadow: 0 0 8px #bfa76f88;
+    }
+    .scale-btn.year::before {
+      content: '';
+      display: block;
+      width: 35px;
+      height: 2px;
+      background: #bfa76f;
+      position: absolute;
+      right: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .scale-btn.month {
+      width: 50px;
+      height: 22px;
+      background: rgba(160,196,255,0.12);
+      border: 1px solid #a0c4ff;
+      border-radius: 6px;
+      color: #1976d2;
+      font-size: 13px;
+      margin: 2px 0 2px 18px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding-left: 8px;
+    }
+    .scale-btn.month.selected {
+      background: #a0c4ff;
+      color: #222;
+      box-shadow: 0 0 8px #a0c4ff88;
+    }
+    .scale-btn.month::before {
+      content: '';
+      display: block;
+      width: 25px;
+      height: 2px;
+      background: #a0c4ff;
+      position: absolute;
+      right: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .scale-btn.day {
+      width: 38px;
+      height: 18px;
+      background: rgba(255, 193, 7, 0.10);
+      border: 1px solid #ffc107;
+      border-radius: 6px;
+      color: #bfa76f;
+      font-size: 11px;
+      margin: 1px 0 1px 38px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      z-index: 0;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding-left: 6px;
+    }
+    .scale-btn.day.selected {
+      background: #ffc107;
+      color: #222;
+      box-shadow: 0 0 8px #ffc10788;
+    }
+    .scale-btn.day::before {
+      content: '';
+      display: block;
+      width: 12px;
+      height: 2px;
+      background: #ffc107;
+      position: absolute;
+      right: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    /* Minor ticks between years/months/days */
+    .scale-tick .minor {
+      width: 40px;
+      height: 10px;
+      position: relative;
+      margin-left: 0;
+    }
+    .scale-tick .minor.month {
+      width: 25px;
+      margin-left: 18px;
+    }
+    .scale-tick .minor.day {
+      width: 12px;
+      margin-left: 38px;
+    }
+    .scale-tick .minor::before {
+      content: '';
+      display: block;
+      width: 100%;
+      height: 2px;
+      background: #bfa76f;
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .scale-tick .minor.month::before {
+      background: #a0c4ff;
+    }
+    .scale-tick .minor.day::before {
+      background: #ffc107;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      #left-navbar {
+        width: 100%;
+        height: auto;
+        top: 0;
+        left: 0;
+        padding: 15px;
+      }
+      #main-content {
+        margin-left: 0;
+        padding-top: 100px;
+      }
+      #cards {
+        flex-direction: column;
+        align-items: center;
+        gap: 25px;
+      }
+      .card {
+        width: 90%;
+      }
+      #quick-stats {
+        flex-direction: column;
+        gap: 25px;
+      }
+      #quick-stats .scale-container, #quick-stats .stats-content {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="mountain-canvas"></canvas> <!-- Canvas for drawing mountains -->
+
+  <div class="content-layer">
+    <nav id="left-navbar">
+      <ul>
+        <li class="header-item">Life's Road Map</li>
+        <li><a href="#dashboard">Dashboard</a></li>
+        <li><a href="#idurnal">Idurnal</a></li>
+        <li><a href="#photos">Photos</a></li>
+        <li><a href="#videos">Videos</a></li>
+        <li><a href="#settings">Settings</a></li>
+      </ul>
+    </nav>
+
+    <div id="main-content">
+      <div id="greeting">Welcome back! Continue mapping your life's journey.</div>
+
+      <div id="cards">
+        <div class="card">
+          <h3>Journal Reports</h3>
+          <div class="count">12</div>
+        </div>
+        <div class="card">
+          <h3>Photos</h3>
+          <div class="count">45</div>
+        </div>
+        <div class="card">
+          <h3>Videos</h3>
+          <div class="count">8</div>
+        </div>
+      </div>
+
+      <div id="quick-stats">
+        <div class="scale-container">
+          <div class="full-vertical-scale" id="fullVerticalScale"></div>
+        </div>
+        <div class="stats-content">
+          <div class="stats-left">
+            <h2>Quick Stats</h2>
+            <div class="date-stats">
+              <span class="date-line">Saturday, July 19, 2025</span>
+              <ul class="stats-details">
+                <li>Entries: 3 journal reports</li>
+                <li>Photos added: 5</li>
+                <li>Videos uploaded: 1</li>
+                <li>Highlights: Reflected on recent hike</li>
+              </ul>
+            </div>
+            <div class="date-stats">
+              <span class="date-line">Friday, July 18, 2025</span>
+              <ul class="stats-details">
+                <li>Entries: 2 journal reports</li>
+                <li>Photos added: 4</li>
+                <li>Videos uploaded: 0</li>
+                <li>Highlights: Family gathering planned</li>
+              </ul>
+            </div>
+            <div class="date-stats">
+              <span class="date-line">Thursday, July 17, 2025</span>
+              <ul class="stats-details">
+                <li>Entries: 4 journal reports</li>
+                <li>Photos added: 6</li>
+                <li>Videos uploaded: 2</li>
+                <li>Highlights: Explored new goals</li>
+              </ul>
+            </div>
+          </div>
+          <div class="stats-right">
+            <img src="https://via.placeholder.com/120?text=Photo+1" alt="Photo 1">
+            <img src="https://via.placeholder.com/120?text=Photo+2" alt="Photo 2">
+            <img src="https://via.placeholder.com/120?text=Photo+3" alt="Photo 3">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('mountain-canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Resize canvas to fit window
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      drawMountains();
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    // Draw 6 layered mountains for more depth
+    function drawMountains() {
+      // Sky gradient
+      const skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      skyGradient.addColorStop(0, '#a1c4fd');
+      skyGradient.addColorStop(1, '#c2e9fb');
+      ctx.fillStyle = skyGradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Layer 1 (farthest)
+      ctx.fillStyle = '#6b7280';
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height);
+      ctx.lineTo(canvas.width * 0.1, canvas.height * 0.6);
+      ctx.lineTo(canvas.width * 0.3, canvas.height * 0.8);
+      ctx.lineTo(canvas.width * 0.5, canvas.height * 0.5);
+      ctx.lineTo(canvas.width * 0.7, canvas.height * 0.7);
+      ctx.lineTo(canvas.width, canvas.height);
+      ctx.closePath();
+      ctx.fill();
+
+      // Layer 2
+      ctx.fillStyle = '#4b5563';
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height);
+      ctx.lineTo(canvas.width * 0.15, canvas.height * 0.55);
+      ctx.lineTo(canvas.width * 0.35, canvas.height * 0.75);
+      ctx.lineTo(canvas.width * 0.55, canvas.height * 0.45);
+      ctx.lineTo(canvas.width * 0.75, canvas.height * 0.65);
+      ctx.lineTo(canvas.width, canvas.height);
+      ctx.closePath();
+      ctx.fill();
+
+      // Layer 3
+      ctx.fillStyle = '#374151';
+      ctx.beginPath();
+      ctx.moveTo(canvas.width * 0.05, canvas.height);
+      ctx.lineTo(canvas.width * 0.25, canvas.height * 0.65);
+      ctx.lineTo(canvas.width * 0.4, canvas.height * 0.85);
+      ctx.lineTo(canvas.width * 0.6, canvas.height * 0.6);
+      ctx.lineTo(canvas.width * 0.8, canvas.height);
+      ctx.closePath();
+      ctx.fill();
+
+      // Layer 4
+      ctx.fillStyle = '#1f2937';
+      ctx.beginPath();
+      ctx.moveTo(canvas.width * 0.3, canvas.height);
+      ctx.lineTo(canvas.width * 0.5, canvas.height * 0.55);
+      ctx.lineTo(canvas.width * 0.65, canvas.height * 0.75);
+      ctx.lineTo(canvas.width * 0.85, canvas.height * 0.5);
+      ctx.lineTo(canvas.width, canvas.height);
+      ctx.closePath();
+      ctx.fill();
+
+      // Layer 5
+      ctx.fillStyle = '#111827';
+      ctx.beginPath();
+      ctx.moveTo(canvas.width * 0.2, canvas.height);
+      ctx.lineTo(canvas.width * 0.4, canvas.height * 0.7);
+      ctx.lineTo(canvas.width * 0.6, canvas.height * 0.9);
+      ctx.lineTo(canvas.width * 0.8, canvas.height * 0.6);
+      ctx.lineTo(canvas.width, canvas.height);
+      ctx.closePath();
+      ctx.fill();
+
+      // Layer 6 (closest)
+      ctx.fillStyle = '#030712';
+      ctx.beginPath();
+      ctx.moveTo(canvas.width * 0.35, canvas.height);
+      ctx.lineTo(canvas.width * 0.45, canvas.height * 0.8);
+      ctx.lineTo(canvas.width * 0.7, canvas.height * 0.65);
+      ctx.lineTo(canvas.width * 0.9, canvas.height * 0.75);
+      ctx.lineTo(canvas.width, canvas.height);
+      ctx.closePath();
+      ctx.fill();
+    }
+    resizeCanvas(); // Initial draw
+
+    // Vertical Scale Script
+    const scaleContainer = document.getElementById('fullVerticalScale');
+
+    // Helper to create a scale tick (year/month/day)
+    function createScaleTick(type, label, onClick) {
+      const btn = document.createElement('button');
+      btn.className = `scale-btn ${type}`;
+      btn.textContent = label;
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        // Toggle selection
+        if (btn.classList.contains('selected')) {
+          btn.classList.remove('selected');
+          // Remove children if collapsing
+          let next = btn.nextSibling;
+          while (next && next.classList.contains('scale-tick')) {
+            next.remove();
+            next = btn.nextSibling;
+          }
+          return;
+        }
+        // Remove other selections at this level
+        const siblings = btn.parentNode.querySelectorAll(`.scale-btn.${type}`);
+        siblings.forEach(b => {
+          if (b !== btn) b.classList.remove('selected');
+        });
+        btn.classList.add('selected');
+        if (onClick) onClick(btn, label);
+      });
+      return btn;
+    }
+
+    // Helper to create minor ticks
+    function createMinorTick(type) {
+      const div = document.createElement('div');
+      div.className = `minor${type ? ' ' + type : ''}`;
+      return div;
+    }
+
+    // Build the full scale in ascending order
+    function buildFullScale() {
+      for (let year = 2002; year <= 2025; year++) {
+        const yearTick = document.createElement('div');
+        yearTick.className = 'scale-tick';
+        const yearBtn = createScaleTick('year', year, (btn, y) => {
+          // Remove any open month/day ticks under other years
+          let next = btn.nextSibling;
+          while (next && next.classList.contains('scale-tick')) {
+            next.remove();
+            next = btn.nextSibling;
+          }
+          // Add months in ascending order
+          for (let m = 1; m <= 12; m++) {
+            const monthTick = document.createElement('div');
+            monthTick.className = 'scale-tick';
+            const monthBtn = createScaleTick('month', m, (mbtn, month) => {
+              // Remove any open day ticks under other months
+              let n = mbtn.nextSibling;
+              while (n && n.classList.contains('scale-tick')) {
+                n.remove();
+                n = mbtn.nextSibling;
+              }
+              // Add days in ascending order
+              const daysInMonth = new Date(year, m, 0).getDate();
+              for (let d = 1; d <= daysInMonth; d++) {
+                const dayTick = document.createElement('div');
+                dayTick.className = 'scale-tick';
+                const dayBtn = createScaleTick('day', d);
+                dayTick.appendChild(dayBtn);
+                mbtn.parentNode.insertBefore(dayTick, mbtn.nextSibling);
+                // Add minor ticks between days
+                if (d < daysInMonth) {
+                  const minor = createMinorTick('day');
+                  mbtn.parentNode.insertBefore(minor, mbtn.nextSibling);
+                }
+              }
+            });
+            monthTick.appendChild(monthBtn);
+            btn.parentNode.insertBefore(monthTick, btn.nextSibling);
+            // Add minor ticks between months
+            if (m < 12) {
+              const minor = createMinorTick('month');
+              btn.parentNode.insertBefore(minor, btn.nextSibling);
+            }
+          }
+        });
+        yearTick.appendChild(yearBtn);
+        scaleContainer.appendChild(yearTick);
+        // Add minor ticks between years
+        if (year < 2025) {
+          const minor = createMinorTick();
+          scaleContainer.appendChild(minor);
+        }
+      }
+    }
+
+    // Collapse all on outside click
+    document.addEventListener('click', function(e) {
+      document.querySelectorAll('.scale-btn.selected').forEach(b => b.classList.remove('selected'));
+      document.querySelectorAll('.scale-tick').forEach(tick => {
+        if (tick.parentNode === scaleContainer) return; // keep year ticks
+        tick.remove();
+      });
+      document.querySelectorAll('.minor.month, .minor.day').forEach(tick => tick.remove());
+    });
+
+    buildFullScale();
+  </script>
+</body>
+</html>

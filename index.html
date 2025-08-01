@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Life's Road Map</title>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond&family=Imperial+Script&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body, html {
+      height: 100%;
+      font-family: 'EB Garamond', serif;
+      color: white;
+      overflow-x: hidden;
+      background: transparent;
+    }
+
+    #space-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      background: black;
+    }
+
+    header {
+      text-align: center;
+      padding: 60px 20px 20px;
+      font-family: 'Imperial Script', cursive;
+      font-size: 3.5rem;
+      color: #fff;
+      text-shadow: 0 0 20px #00f0ff, 0 0 30px #00f0ff;
+      animation: pulse 4s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { text-shadow: 0 0 20px #00f0ff, 0 0 30px #00f0ff; }
+      50% { text-shadow: 0 0 30px #00f0ff, 0 0 60px #00f0ff; }
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      padding: 10px;
+      text-align: center;
+      z-index: 10;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      font-size: 1.1rem;
+      transition: color 0.3s ease;
+    }
+    nav a:hover {
+      color: #00f0ff;
+    }
+
+    .parallax-layer {
+      position: relative;
+      padding: 120px 20px;
+      text-align: center;
+      will-change: transform;
+      transition: transform 0.5s ease;
+    }
+    .parallax-layer h2 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      text-shadow: 0 0 10px rgba(255,255,255,0.2);
+    }
+    .parallax-layer p {
+      font-size: 1.2rem;
+      color: #ddd;
+    }
+
+    .cards-section {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 20px 30px;
+      min-width: 180px;
+      transition: transform 0.4s ease, box-shadow 0.4s;
+      color: white;
+      text-decoration: none;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(6px);
+    }
+    .card:hover {
+      transform: translateY(-12px) scale(1.03);
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <canvas id="space-bg"></canvas>
+
+  <header>Life's Road Map</header>
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#journal">Journal</a>
+    <a href="#contact">Contact</a>
+  </nav>
+
+  <section class="parallax-layer" data-speed="0.3">
+    <h2>Capture Your Journey</h2>
+    <p>Your personal space to log memories, record dreams, and relive milestones.</p>
+  </section>
+
+  <section class="parallax-layer cards-section" data-speed="0.5">
+    <a href="#" class="card">Protocol</a>
+    <a href="#" class="card">Features</a>
+    <a href="#" class="card">Support</a>
+  </section>
+
+  <script>
+    // Parallax scroll
+    window.addEventListener("scroll", () => {
+      document.querySelectorAll(".parallax-layer").forEach(layer => {
+        const speed = layer.getAttribute("data-speed");
+        const yPos = window.scrollY * speed;
+        layer.style.transform = `translateY(${yPos}px)`;
+      });
+    });
+
+    // Starfield effect
+    const canvas = document.getElementById('space-bg');
+    const ctx = canvas.getContext('2d');
+    let stars = [], shootingStars = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    function createStars(count) {
+      stars = [];
+      for (let i = 0; i < count; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 1.5 + 0.5,
+          speed: Math.random() * 0.5 + 0.2
+        });
+      }
+    }
+
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'white';
+      stars.forEach(star => {
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        ctx.fill();
+        star.y += star.speed;
+        if (star.y > canvas.height) {
+          star.y = 0;
+          star.x = Math.random() * canvas.width;
+        }
+      });
+
+      shootingStars.forEach((star, index) => {
+        ctx.beginPath();
+        ctx.strokeStyle = '#00f0ff';
+        ctx.moveTo(star.x, star.y);
+        ctx.lineTo(star.x - 10, star.y + 10);
+        ctx.stroke();
+        star.x += star.vx;
+        star.y += star.vy;
+        if (star.x < 0 || star.y > canvas.height) shootingStars.splice(index, 1);
+      });
+    }
+
+    function addShootingStar() {
+      shootingStars.push({
+        x: Math.random() * canvas.width,
+        y: 0,
+        vx: -3,
+        vy: 3
+      });
+    }
+
+    function animate() {
+      drawStars();
+      if (Math.random() < 0.01) addShootingStar();
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      createStars(150);
+    });
+
+    resizeCanvas();
+    createStars(150);                                                             
+    animate();
+  </script>
+</body>
+</html>

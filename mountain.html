@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Life's Road Map</title>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond&family=Imperial+Script&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body, html {
+      height: 100%;
+      font-family: 'EB Garamond', serif;
+      color: white;
+      overflow-x: hidden;
+      background: transparent;
+    }
+
+    #mountain-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -2;
+    }
+
+    /* Overlay for text readability */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(18, 20, 30, 0.25);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    header {
+      text-align: center;
+      padding: 60px 20px 20px;
+      font-family: 'Imperial Script', cursive;
+      font-size: 3.5rem;
+      color: #fff;
+      text-shadow: 0 0 20px #88e2ff, 0 0 30px #324994;
+      animation: pulse 4s infinite;
+      position: relative;
+      z-index: 2;
+    }
+
+    @keyframes pulse {
+      0%, 100% { text-shadow: 0 0 20px #88e2ff, 0 0 30px #324994; }
+      50% { text-shadow: 0 0 35px #c7eaff, 0 0 60px #324994; }
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      padding: 10px;
+      text-align: center;
+      z-index: 10;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      font-size: 1.1rem;
+      transition: color 0.3s ease;
+    }
+    nav a:hover {
+      color: #74b7e3;
+    }
+
+    .parallax-layer {
+      position: relative;
+      padding: 120px 20px;
+      text-align: center;
+      will-change: transform;
+      transition: transform 0.5s ease;
+      z-index: 1;
+    }
+    .parallax-layer h2 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      text-shadow: 0 0 16px rgba(180,220,255,0.18);
+    }
+    .parallax-layer p {
+      font-size: 1.2rem;
+      color: #e0e7fb;
+    }
+
+    .cards-section {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 12px;
+      padding: 20px 30px;
+      min-width: 180px;
+      transition: transform 0.4s ease, box-shadow 0.4s;
+      color: white;
+      text-decoration: none;
+      box-shadow: 0 0 10px rgba(110,155,205,0.07);
+      backdrop-filter: blur(6px);
+    }
+    .card:hover {
+      transform: translateY(-12px) scale(1.03);
+      box-shadow: 0 0 25px #74b7e388;
+    }
+
+    @media (max-width: 600px) {
+      header {
+        font-size: 1.8rem;
+        padding-top: 30px;
+      }
+      .parallax-layer h2 {
+        font-size: 1.3em;
+      }
+      nav a {
+        font-size: 1em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="mountain-canvas"></canvas>
+
+  <header>Life's Road Map</header>
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#journal">Journal</a>
+    <a href="#contact">Contact</a>
+  </nav>
+
+  <section class="parallax-layer" data-speed="0.3">
+    <h2>Capture Your Journey</h2>
+    <p>Your personal space to log memories, record dreams, and relive milestones.</p>
+  </section>
+
+  <section class="parallax-layer cards-section" data-speed="0.5">
+    <a href="#" class="card">Protocol</a>
+    <a href="#" class="card">Features</a>
+    <a href="#" class="card">Support</a>
+  </section>
+
+  <script>
+    const canvas = document.getElementById('mountain-canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Set canvas to full size
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Variables for animations
+    let birdX = -50;
+    let birdY = 100;
+    let birdWingAngle = 0;
+    let waterfallParticles = [];
+    let mistParticles = []; // New array for ground mist
+
+    // Create waterfall particles
+    function createParticles() {
+      for (let i = 0; i < 50; i++) {
+        waterfallParticles.push({
+          x: canvas.width * 0.75 + (Math.random() * 20 - 10),
+          y: canvas.height * 0.5 + Math.random() * (canvas.height * 0.5),
+          size: Math.random() * 3 + 1,
+          speed: Math.random() * 2 + 1,
+          opacity: Math.random() * 0.5 + 0.3
+        });
+      }
+    }
+    createParticles();
+
+    // Create ground mist particles
+    function createMistParticles() {
+      for (let i = 0; i < 30; i++) {
+        mistParticles.push({
+          x: canvas.width * 0.75 + (Math.random() * 60 - 30),
+          y: canvas.height * 0.95 + (Math.random() * 20 - 10),
+          size: Math.random() * 5 + 2,
+          speedX: Math.random() * 0.5 - 0.25,
+          speedY: Math.random() * -0.5 - 0.2, // Rise upward
+          opacity: Math.random() * 0.4 + 0.2,
+          life: Math.random() * 100 + 50 // Fade out over time
+        });
+      }
+    }
+    createMistParticles();
+
+    // Animation loop
+    function drawScene() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Sky gradient with sun glow
+      const skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      skyGradient.addColorStop(0, '#a1c4fd');
+      skyGradient.addColorStop(0.3, '#c2e9fb');
+      skyGradient.addColorStop(1, '#e0f7fa');
+      ctx.fillStyle = skyGradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Sun
+      ctx.fillStyle = 'rgba(255, 229, 180, 0.6)';
+      ctx.beginPath();
+      ctx.arc(canvas.width * 0.15, canvas.height * 0.2, 50, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Clouds (simple ellipses)
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx.beginPath();
+      ctx.ellipse(canvas.width * 0.2, canvas.height * 0.25, 80, 30, 0, 0, Math.PI * 2);
+      ctx.ellipse(canvas.width * 0.25, canvas.height * 0.28, 50, 20, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(canvas.width * 0.8, canvas.height * 0.15, 70, 25, 0, 0, Math.PI * 2);
+      ctx.ellipse(canvas.width * 0.85, canvas.height * 0.18, 40, 15, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Mountain layers with gradients and snow
+      // Back layer
+      const backGrad = ctx.createLinearGradient(0, canvas.height * 0.4, 0, canvas.height);
+      backGrad.addColorStop(0, '#4a5568');
+      backGrad.addColorStop(1, '#2d3748');
+      ctx.fillStyle = backGrad;
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height);
+      ctx.lineTo(canvas.width * 0.2, canvas.height * 0.55);
+      ctx.lineTo(canvas.width * 0.4, canvas.height * 0.75);
+      ctx.lineTo(canvas.width * 0.6, canvas.height * 0.45);
+      ctx.lineTo(canvas.width * 0.8, canvas.height * 0.65);
+      ctx.lineTo(canvas.width, canvas.height);
+      ctx.closePath();
+      ctx.fill();
+      // Snow on back peaks
+      ctx.fillStyle = '#f7fafc';
+      ctx.beginPath();
+      ctx.moveTo(canvas.width * 0.6, canvas.height * 0.45);
+      ctx.lineTo(canvas.width * 0.55, canvas.height * 0.5);
+      ctx.lineTo(canvas.width * 0.65, canvas.height * 0.5);
+      ctx.closePath();
+      ctx.fill();
+
+      // Middle layer
+      const midGrad = ctx.createLinearGradient(0, canvas.height * 0.5, 0, canvas.height);
+      midGrad.addColorStop(0, '#2d3748');
+      midGrad.addColorStop(1, '#1a202c');
+      ctx.fillStyle = midGrad;
+      ctx.beginPath();
+      ctx.moveTo(canvas.width * 0.1, canvas.height);
+      ctx.lineTo(canvas.width * 0.3, canvas.height * 0.65);
+      ctx.lineTo(canvas.width * 0.45, canvas.height * 0.85);
+      ctx.lineTo(canvas.width * 0.55, canvas.height * 0.6);
+      ctx.lineTo(canvas.width * 0.7, canvas.height);
+      ctx.closePath();
+      ctx.fill();
+      // Snow on middle peaks
+      ctx.fillStyle = '#f7fafc';
+      ctx.beginPath();
+      ctx.moveTo(canvas.width * 0.55, canvas.height * 0.6);
+      ctx.lineTo(canvas.width * 0.5, canvas.height * 0.65);
+      ctx.lineTo(canvas.width * 0.6, canvas.height * 0.65);
+      ctx.closePath();
+      ctx.fill();
+
+      // Front layer with waterfall origin
+      const frontGrad = ctx.createLinearGradient(0, canvas.height * 0.6, 0, canvas.height);
+      frontGrad.addColorStop(0, '#1a202c');
+      frontGrad.addColorStop(1, '#000');
+      ctx.fillStyle = frontGrad;
+      ctx.beginPath();
+      ctx.moveTo(canvas.width * 0.4, canvas.height);
+      ctx.lineTo(canvas.width * 0.6, canvas.height * 0.55);
+      ctx.lineTo(canvas.width * 0.75, canvas.height * 0.75);
+      ctx.lineTo(canvas.width * 0.75, canvas.height * 0.5); // Peak for waterfall start
+      ctx.lineTo(canvas.width * 0.9, canvas.height * 0.65);
+      ctx.lineTo(canvas.width, canvas.height);
+      ctx.closePath();
+      ctx.fill();
+      // Snow on front peaks
+      ctx.fillStyle = '#f7fafc';
+      ctx.beginPath();
+      ctx.moveTo(canvas.width * 0.75, canvas.height * 0.5);
+      ctx.lineTo(canvas.width * 0.7, canvas.height * 0.55);
+      ctx.lineTo(canvas.width * 0.8, canvas.height * 0.55);
+      ctx.closePath();
+      ctx.fill();
+
+      // Trees (simple pine shapes in foreground)
+      function drawTree(x, y, height) {
+        ctx.fillStyle = '#2f855a'; // Green
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - 20, y + height / 3);
+        ctx.lineTo(x + 20, y + height / 3);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(x, y + height / 3 - 10);
+        ctx.lineTo(x - 25, y + 2 * height / 3);
+        ctx.lineTo(x + 25, y + 2 * height / 3);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(x, y + 2 * height / 3 - 10);
+        ctx.lineTo(x - 30, y + height);
+        ctx.lineTo(x + 30, y + height);
+        ctx.closePath();
+        ctx.fill();
+        // Trunk
+        ctx.fillStyle = '#4a3320';
+        ctx.fillRect(x - 5, y + height, 10, 20);
+      }
+      drawTree(canvas.width * 0.1, canvas.height * 0.8, 100);
+      drawTree(canvas.width * 0.95, canvas.height * 0.85, 80);
+
+      // Waterfall base (starting from mountain peak)
+      ctx.strokeStyle = 'rgba(190, 227, 248, 0.9)';
+      ctx.lineWidth = 30;
+      ctx.beginPath();
+      ctx.moveTo(canvas.width * 0.75, canvas.height * 0.5); // Start at peak
+      ctx.quadraticCurveTo(canvas.width * 0.72, canvas.height * 0.7, canvas.width * 0.75, canvas.height * 0.9);
+      ctx.stroke();
+
+      // Animated waterfall particles (mist/spray along the fall)
+      waterfallParticles.forEach(p => {
+        ctx.fillStyle = `rgba(235, 248, 255, ${p.opacity})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        p.y += p.speed;
+        if (p.y > canvas.height * 0.9) {
+          p.y = canvas.height * 0.5 + Math.random() * 100; // Reset to peak area
+          p.x = canvas.width * 0.75 + (Math.random() * 20 - 10);
+        }
+      });
+
+      // Pool with ripple
+      ctx.fillStyle = 'rgba(190, 227, 248, 0.7)';
+      ctx.beginPath();
+      ctx.ellipse(canvas.width * 0.75, canvas.height * 0.95, 60, 20, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.ellipse(canvas.width * 0.75, canvas.height * 0.95, 70, 25, 0, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Animated ground mist
+      mistParticles.forEach((p, index) => {
+        ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        p.x += p.speedX;
+        p.y += p.speedY;
+        p.opacity -= 0.005; // Fade out
+        p.life -= 1;
+        if (p.life <= 0 || p.opacity <= 0) {
+          // Respawn mist particles
+          mistParticles[index] = {
+            x: canvas.width * 0.75 + (Math.random() * 60 - 30),
+            y: canvas.height * 0.95 + (Math.random() * 20 - 10),
+            size: Math.random() * 5 + 2,
+            speedX: Math.random() * 0.5 - 0.25,
+            speedY: Math.random() * -0.5 - 0.2,
+            opacity: Math.random() * 0.4 + 0.2,
+            life: Math.random() * 100 + 50
+          };
+        }
+      });
+
+      // Animated bird with improved details
+      birdX += 1.5;
+      birdY = 100 + Math.sin(birdX * 0.01) * 20; // Wavy path
+      if (birdX > canvas.width + 50) birdX = -50;
+      birdWingAngle = Math.sin(Date.now() * 0.005) * 20; // Smoother flapping
+
+      // Bird shadow
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+      ctx.beginPath();
+      ctx.ellipse(birdX + 10, birdY + 50, 20, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Bird body (with feather-like gradient)
+      const birdGrad = ctx.createLinearGradient(birdX, birdY - 5, birdX, birdY + 5);
+      birdGrad.addColorStop(0, '#4a5568');
+      birdGrad.addColorStop(1, '#2d3748');
+      ctx.fillStyle = birdGrad;
+      ctx.beginPath();
+      ctx.ellipse(birdX + 10, birdY, 18, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Wings (more detailed with feather curves)
+      ctx.fillStyle = '#2d3748';
+      ctx.beginPath();
+      ctx.moveTo(birdX, birdY);
+      ctx.quadraticCurveTo(birdX - 15, birdY - 15 + birdWingAngle, birdX - 25, birdY - 5);
+      ctx.quadraticCurveTo(birdX - 20, birdY + 5 - birdWingAngle / 2, birdX - 10, birdY + 5);
+      ctx.quadraticCurveTo(birdX - 5, birdY + birdWingAngle / 2, birdX, birdY);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(birdX + 20, birdY);
+      ctx.quadraticCurveTo(birdX + 35, birdY - 15 + birdWingAngle, birdX + 45, birdY - 5);
+      ctx.quadraticCurveTo(birdX + 40, birdY + 5 - birdWingAngle / 2, birdX + 30, birdY + 5);
+      ctx.quadraticCurveTo(birdX + 25, birdY + birdWingAngle / 2, birdX + 20, birdY);
+      ctx.fill();
+
+      // Tail feathers
+      ctx.fillStyle = '#1a202c';
+      ctx.beginPath();
+      ctx.moveTo(birdX - 5, birdY);
+      ctx.lineTo(birdX - 15, birdY + 3);
+      ctx.lineTo(birdX - 10, birdY - 3);
+      ctx.closePath();
+      ctx.fill();
+
+      // Eye and beak
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(birdX + 15, birdY - 1, 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#000';
+      ctx.beginPath();
+      ctx.arc(birdX + 15, birdY - 1, 1, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#f6e05e';
+      ctx.beginPath();
+      ctx.moveTo(birdX + 18, birdY);
+      ctx.lineTo(birdX + 23, birdY + 1);
+      ctx.lineTo(birdX + 18, birdY + 2);
+      ctx.fill();
+
+      requestAnimationFrame(drawScene);
+    }
+    drawScene();
+
+    // Optional parallax for sections
+    window.addEventListener("scroll", () => {
+      document.querySelectorAll(".parallax-layer").forEach(layer => {
+        const speed = layer.getAttribute("data-speed");
+        const yPos = window.scrollY * speed;
+        layer.style.transform = `translateY(${yPos}px)`;
+      });
+    });
+  </script>
+</body>
+</html>

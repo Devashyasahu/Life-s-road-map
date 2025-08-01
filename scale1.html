@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+.vertical-ruler, .month-ruler, .day-ruler {
+  width: 80px;
+  min-height: 400px;
+  background: transparent;
+  border: 2px solid #bfa76f;
+  border-radius: 8px;
+  margin: 40px 0 40px 40px;
+  position: relative;
+  box-shadow: 0 2px 8px #0002;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  transition: transform 0.4s cubic-bezier(.4,2,.6,1), box-shadow 0.4s;
+  z-index: 1;
+  float: left;
+}
+
+.ruler-ticks {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 8px 0;
+}
+
+.ruler-ticks button.big {
+  width: 60px;
+  height: 28px;
+  background: rgba(191, 167, 111, 0.15);
+  border: 1px solid #bfa76f;
+  border-radius: 6px;
+  color: #bfa76f;
+  font-family: monospace;
+  font-size: 15px;
+  font-weight: bold;
+  margin-right: 0;
+  margin-bottom: 0;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 8px;
+}
+
+.ruler-ticks button.big::before {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 2px;
+  background: #bfa76f;
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.ruler-ticks button.big.selected {
+  background: #bfa76f;
+  color: #222;
+  box-shadow: 0 0 8px #bfa76f88;
+}
+
+.ruler-ticks .small {
+  width: 40px;
+  height: 10px;
+  position: relative;
+}
+
+.ruler-ticks .small::before {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: #bfa76f;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Month and day rulers */
+.month-ruler, .day-ruler {
+  margin-left: 20px;
+  min-width: 60px;
+  border-color: #a0c4ff;
+}
+.month-ruler .big, .day-ruler .big {
+  border-color: #a0c4ff;
+  color: #1976d2;
+}
+.month-ruler .big.selected, .day-ruler .big.selected {
+  background: #a0c4ff;
+  color: #222;
+  box-shadow: 0 0 8px #a0c4ff88;
+}
+.month-ruler .big::before, .day-ruler .big::before {
+  background: #a0c4ff;
+}
+.month-ruler .small::before, .day-ruler .small::before {
+  background: #a0c4ff;
+}
+
+/* Counter box styles */
+.counter-box {
+  position: absolute;
+  left: 85px;
+  width: 60px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 6px;
+  box-shadow: 0 2px 8px #bfa76f55;
+  padding: 6px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  z-index: 10;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.counter-numbers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 6px;
+  padding: 0 8px;
+}
+.counter-numbers span {
+  font-family: monospace;
+  font-size: 15px;
+  color: #bfa76f;
+  margin: 2px 0;
+  width: 22px;
+  text-align: center;
+  border-radius: 3px;
+  background: #fffbe6;
+  box-shadow: 0 1px 2px #bfa76f22;
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+  .vertical-ruler, .month-ruler, .day-ruler {
+    width: 50px;
+    min-width: 36px;
+    font-size: 12px;
+    margin-left: 10px;
+  }
+  .ruler-ticks button.big {
+    width: 36px;
+    font-size: 12px;
+    padding-left: 2px;
+  }
+  .counter-box {
+    left: 55px;
+    width: 40px;
+  }
+  .counter-numbers span {
+    font-size: 12px;
+    width: 16px;
+  }
+}
+</style>
+<body>
+    
+    <div class="vertical-ruler" id="yearRuler"></div>
+    <!-- Month and day scales will be injected here -->
+
+    <!-- Counter container (will be moved by JS) -->
+    <div id="counterBox" class="counter-box" style="display:none;">
+      <div class="counter-numbers">
+        <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span>
+      </div>
+    </div>
+
+    <script>
+    const yearRuler = document.getElementById('yearRuler');
+    let monthRuler = null;
+    let dayRuler = null;
+
+    // Helper to create a scale
+    function createScale(type, start, end, onClick) {
+      const scale = document.createElement('div');
+      scale.className = type + '-ruler';
+      const ticks = document.createElement('div');
+      ticks.className = 'ruler-ticks';
+      for (let i = start; i <= end; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'big';
+        btn.textContent = (type === 'month') ? i : (type === 'day') ? i : i;
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          // Remove previous selection
+          ticks.querySelectorAll('button.big').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          if (onClick) onClick(i, btn, scale);
+        });
+        ticks.appendChild(btn);
+        // Add minor ticks except after the last
+        if (i < end) {
+          for (let j = 0; j < 4; j++) {
+            const small = document.createElement('div');
+            small.className = 'small';
+            ticks.appendChild(small);
+          }
+        }
+      }
+      scale.appendChild(ticks);
+      return scale;
+    }
+
+    // Create year scale
+    function createYearScale() {
+      const ticks = document.createElement('div');
+      ticks.className = 'ruler-ticks';
+      for (let year = 2002; year <= 2025; year++) {
+        const btn = document.createElement('button');
+        btn.className = 'big';
+        btn.textContent = year;
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          // Remove previous selection
+          ticks.querySelectorAll('button.big').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          showMonthRuler(btn, year);
+        });
+        ticks.appendChild(btn);
+        if (year < 2025) {
+          for (let j = 0; j < 4; j++) {
+            const small = document.createElement('div');
+            small.className = 'small';
+            ticks.appendChild(small);
+          }
+        }
+      }
+      yearRuler.appendChild(ticks);
+    }
+
+    // Show month scale next to selected year
+    function showMonthRuler(yearBtn, year) {
+      // Remove previous
+      if (monthRuler) monthRuler.remove();
+      if (dayRuler) dayRuler.remove();
+      monthRuler = createScale('month', 1, 12, (month, monthBtn, scale) => {
+        showDayRuler(monthBtn, year, month);
+      });
+      // Position
+      yearRuler.parentNode.insertBefore(monthRuler, yearRuler.nextSibling);
+      // Move monthRuler to align with yearBtn
+      setTimeout(() => {
+        const rect = yearBtn.getBoundingClientRect();
+        monthRuler.style.position = 'absolute';
+        monthRuler.style.top = (window.scrollY + rect.top - 2) + 'px';
+        monthRuler.style.left = (yearRuler.getBoundingClientRect().right + 20) + 'px';
+        monthRuler.style.zIndex = 10;
+      }, 10);
+    }
+
+    // Show day scale next to selected month
+    function showDayRuler(monthBtn, year, month) {
+      if (dayRuler) dayRuler.remove();
+      // Days in month
+      const daysInMonth = new Date(year, month, 0).getDate();
+      dayRuler = createScale('day', 1, daysInMonth);
+      document.body.appendChild(dayRuler);
+      // Move dayRuler to align with monthBtn
+      setTimeout(() => {
+        const rect = monthBtn.getBoundingClientRect();
+        dayRuler.style.position = 'absolute';
+        dayRuler.style.top = (window.scrollY + rect.top - 2) + 'px';
+        dayRuler.style.left = (monthRuler.getBoundingClientRect().right + 20) + 'px';
+        dayRuler.style.zIndex = 20;
+      }, 10);
+    }
+
+    // Hide scales when clicking outside
+    document.addEventListener('click', function(e) {
+      if (monthRuler) monthRuler.remove();
+      if (dayRuler) dayRuler.remove();
+      document.querySelectorAll('.big.selected').forEach(b => b.classList.remove('selected'));
+    });
+
+    createYearScale();
+    </script>
+</body>
+</html>

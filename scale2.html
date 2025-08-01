@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .space-footer {
+          position: relative;
+          min-height: 220px;
+          color: #fffbe6;
+          background: #0a0a23;
+          overflow: hidden;
+          padding: 30px 0 30px 0;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          justify-content: center;
+          font-family: 'EB Garamond', serif;
+          border-top: 2px solid #222;
+        }
+
+        /* Starfield background using multiple box-shadows */
+        .space-footer::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          background: transparent;
+          pointer-events: none;
+          /* 100 random stars */
+          box-shadow:
+            20px 30px #fff, 50px 80px #fff, 120px 40px #fff, 200px 100px #fff,
+            300px 60px #fff, 400px 120px #fff, 500px 30px #fff, 600px 90px #fff,
+            700px 50px #fff, 800px 110px #fff, 900px 70px #fff, 1000px 130px #fff,
+            1100px 20px #fff, 1150px 80px #fff, 1180px 150px #fff, 1250px 60px #fff,
+            1300px 100px #fff, 1350px 40px #fff, 1400px 120px #fff, 1450px 30px #fff,
+            1500px 90px #fff, 1550px 50px #fff, 1600px 110px #fff, 1650px 70px #fff,
+            1700px 130px #fff, 1750px 20px #fff, 1800px 80px #fff, 1850px 150px #fff,
+            1900px 60px #fff, 1950px 100px #fff, 2000px 40px #fff, 2050px 120px #fff,
+            2100px 30px #fff, 2150px 90px #fff, 2200px 50px #fff, 2250px 110px #fff,
+            2300px 70px #fff, 2350px 130px #fff, 2400px 20px #fff, 2450px 80px #fff,
+            2480px 150px #fff, 2500px 60px #fff, 2550px 100px #fff, 2600px 40px #fff,
+            2650px 120px #fff, 2700px 30px #fff, 2750px 90px #fff, 2800px 50px #fff,
+            2850px 110px #fff, 2900px 70px #fff, 2950px 130px #fff, 3000px 20px #fff,
+            3050px 80px #fff, 3080px 150px #fff, 3100px 60px #fff, 3150px 100px #fff,
+            3200px 40px #fff, 3250px 120px #fff, 3300px 30px #fff, 3350px 90px #fff,
+            3400px 50px #fff, 3450px 110px #fff, 3500px 70px #fff, 3550px 130px #fff,
+            3600px 20px #fff, 3650px 80px #fff, 3680px 150px #fff, 3700px 60px #fff,
+            3750px 100px #fff, 3800px 40px #fff, 3850px 120px #fff, 3900px 30px #fff,
+            3950px 90px #fff, 4000px 50px #fff, 4050px 110px #fff, 4100px 70px #fff,
+            4150px 130px #fff, 4200px 20px #fff, 4250px 80px #fff, 4280px 150px #fff,
+            4300px 60px #fff, 4350px 100px #fff, 4400px 40px #fff, 4450px 120px #fff,
+            4500px 30px #fff, 4550px 90px #fff, 4600px 50px #fff, 4650px 110px #fff,
+            4700px 70px #fff, 4750px 130px #fff, 4800px 20px #fff, 4850px 80px #fff;
+          /* You can add more or randomize for more stars */
+        }
+
+        .footer-line {
+          position: relative;
+          z-index: 1;
+          display: flex;
+          align-items: center;
+          font-size: 1.1em;
+          margin: 8px 0;
+          padding-left: 12px;
+          letter-spacing: 1px;
+          text-shadow: 0 1px 4px #000a;
+        }
+
+        .rocket {
+          display: inline-block;
+          width: 28px;
+          height: 28px;
+          margin-right: 12px;
+          vertical-align: middle;
+          background: none;
+        }
+        .rocket svg {
+          width: 100%;
+          height: 100%;
+          display: block;
+          filter: drop-shadow(0 0 4px #fff8);
+          animation: rocket-flicker 1.2s infinite alternate;
+        }
+        @keyframes rocket-flicker {
+          0% { filter: drop-shadow(0 0 4px #fff8);}
+          100% { filter: drop-shadow(0 0 8px #ffec);}
+        }
+    </style>
+</head>
+<body>
+    <footer class="space-footer">
+      <div class="footer-line"><span class="rocket"></span>space race is beginning</div>
+      <div class="footer-line"><span class="rocket"></span>jupiter's asteroid mine</div>
+      <div class="footer-line"><span class="rocket"></span>1. how to reach there?</div>
+      <div class="footer-line"><span class="rocket"></span>2. cost efficient?</div>
+      <div class="footer-line"><span class="rocket"></span>3. how to extract valuable metal?</div>
+      <div class="footer-line"><span class="rocket"></span>4. who will be first?</div>
+    </footer>
+</body>
+</html>
